@@ -1,0 +1,35 @@
+FROM alpine:latest
+
+# Variável de cache para forçar rebuilds
+ARG CACHEBUST=1
+
+# Adicionando repositórios necessários e instalando pacotes
+RUN echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories && \
+    apk --no-cache update && \
+    apk --no-cache add tor@testing privoxy runit
+
+# Configurando o Privoxy para usar o Tor
+RUN echo 'forward-socks5t / 127.0.0.1:9050 .' >> /etc/privoxy/config && \
+    echo 'max-client-connections 100' >> /etc/privoxy/config && \
+    echo 'keep-alive-timeout 0' >> /etc/privoxy/config  # Desabilitar conexões persistentes
+
+# Configurando o Tor (arquivo torrc)
+RUN echo 'Log notice stdout' > /etc/tor/torrc && \
+    echo 'MaxCircuitDirtiness 10' >> /etc/tor/torrc  # Alterar circuitos a cada 10 segundos
+
+# Script embutido no Dockerfile para forçar a mudança de circuito do Tor periodicamente
+RUN printf '#!/bin/sh\nwhile true; do\nkillall -HUP tor\nsleep 60\ndone\n' > /usr/local/bin/tor-reload.sh && \
+    chmod +x /usr/local/bin/tor-reload.sh
+
+# Criando os diretórios de serviço para o runit
+COPY service /etc/service/
+
+# Dando permissão de execução aos scripts de inicialização dos serviços
+RUN chmod +x -v /etc/service/tor/run && \
+    chmod +x /etc/service/privoxy/run
+
+# Expondo as portas utilizadas pelos serviços
+EXPOSE 8118 9050
+
+# Comando para rodar o runit, Tor e reiniciar circuitos
+CMD ["sh", "-c", "runsvdir /etc/service & /usr/local/bin/tor-reload.sh"]
