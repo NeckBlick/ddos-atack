@@ -84,6 +84,12 @@ app_config(){
     sleep 1
 }
 
+execute_crawler(){
+    echo "n\n\n$GREEN [+] Start recon fase...$END\n\n\n"
+
+    python crawler.py
+    sleep 1
+}
 
 #-------------------------------------
 #   Creating containers and atacking
