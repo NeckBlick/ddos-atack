@@ -9,9 +9,7 @@
 #-----------------------------
 
 
-IMAGE_NAME="ddos-atack" 
-PROXY_URL="http://localhost:8118"
-
+IMAGE_NAME="ddos-atack"
 
 #-----------------------------
 #       Terminal colors
@@ -25,28 +23,6 @@ END="\e[00m"
 #-----------------------------
 #       Creating images
 #-----------------------------
-docker_install(){
-    echo "n\n\n$GREEN [+] Start instalation docker...$END\n\n\n"
-    sudo apt-get update
-    sudo apt-get -y install curl git ruby-full apt-transport-https ca-certificates gnupg2 software-properties-common
-
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-    echo "deb [arch=amd64] deb https://download.docker.com/linux/debian bullseye stable" >> /etc/apt/sources.list
-
-    sudo apt-get update
-
-    sudo apt-get -y install docker-ce
-
-    echo -e "\n\n\n$GREEN[+] Enabling docker service...$END\n\n\n"
-    sleep 1
-
-    sudo systemctl enable docker
-    sudo systemctl start docker
-
-    echo -e "\n\n\n$GREEN[+] Docker service start...$END\n\n\n"
-}
-
 proxy_config(){
     echo -e "\n\n$GREEN [+] Start building proxy image...$END\n\n\n"
     docker build -t privoxy -f ./privoxy/Dockerfile.TOR .
@@ -61,17 +37,17 @@ proxy_config(){
     done
 }
 
-app_config(){
-    echo "n\n\n$GREEN [+] Start build app image...$END\n\n\n"
-    docker build -t ddos-atack -f ./Dockerfile.app .
-
-    sleep 1
-}
-
 execute_crawler(){
     echo "n\n\n$GREEN [+] Start recon fase...$END\n\n\n"
 
     python crawler.py
+    sleep 4
+}
+
+app_config(){
+    echo "n\n\n$GREEN [+] Start build app image...$END\n\n\n"
+    docker build -t ddos-atack -f ./Dockerfile.app .
+
     sleep 1
 }
 
@@ -89,8 +65,8 @@ generate_attack(){
 }
 
 main(){
-    docker_install
     proxy_config
+    execute_crawler
     app_config
     generate_attack
 }

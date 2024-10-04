@@ -18,8 +18,15 @@ proxies = [
 ]
 
 def get_urls():
+    urls = []
     with open("results.txt", "r") as r:
-        return [ line.strip() for line in r.readlines()]
+        for line in r:
+            # Separar a linha por ';' e pegar o último elemento (a URL)
+            parts = line.strip().split(';')
+            if len(parts) >= 3:  # Certifica-se de que há ao menos 3 partes
+                url = parts[2].strip()  # Pega a URL e remove espaços em branco
+                urls.append(url)
+    return urls
     
 
 # Função para carregar os User-Agents a partir de um arquivo

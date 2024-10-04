@@ -22,7 +22,7 @@ RUN printf '#!/bin/sh\nwhile true; do\nkillall -HUP tor\nsleep 60\ndone\n' > /us
     chmod +x /usr/local/bin/tor-reload.sh
 
 # Criando os diretórios de serviço para o runit
-COPY service /etc/service/
+COPY ./privoxy/service /etc/service/
 
 # Dando permissão de execução aos scripts de inicialização dos serviços
 RUN chmod +x -v /etc/service/tor/run && \
