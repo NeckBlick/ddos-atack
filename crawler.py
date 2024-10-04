@@ -4,11 +4,21 @@ import time
 from urllib.parse import urljoin
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import argparse
+import pandas as pd
 
 
+def reset_file(file_path):
+    try:
+        with open(file_path, 'w') as file:
+            file.write('')
+        print(f"O arquivo {file_path} foi resetado com sucesso.")
+    except FileNotFoundError:
+        print(f"Erro: O arquivo {file_path} não foi encontrado.")
+    except Exception as e:
+        print(f"Erro ao resetar o arquivo: {e}")
 
 def assembly_headers(browser="chrome", user_agent=None, accept=None, accept_language="en-US,en;q=0.9", content_type=None):
-    
+
     default_headers = {
         "chrome": {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Gecko) Chrome/116.0.0.0 Safari/537.36',
@@ -36,7 +46,7 @@ def assembly_headers(browser="chrome", user_agent=None, accept=None, accept_lang
 
 def connection(url, headers, method="GET"):
     if method == 'GET':
-        response = requests.get(url=url, headers=headers)
+        response = requests.get(url=url, headers=headers, proxies={})
         return response
 
 
@@ -66,7 +76,7 @@ def req_parser(url, domain=None, root_url=None):
 
     result = {
         "response_time": response.elapsed.total_seconds(),
-        "status": response.status_code,
+        "status": str(response.status_code),
         "url": response.url,
     }
     
@@ -76,9 +86,10 @@ def req_parser(url, domain=None, root_url=None):
 def process_url(item, domain, sleeptime=None, root_url=None):
     domain_urls, relative_urls, result = req_parser(url=item, domain=domain, root_url=root_url)
 
-    with open("results.txt", "a") as f:
-        print(result)
-        f.write(f'{result["response_time"]}; {result["status"]}; {result["url"]}\n')
+    if result['status'].startswith("20"):
+        with open("results.txt", "a") as f:
+            print(f'{result["response_time"]:.2f};{result["status"]};{result["url"]}')
+            f.write(f'{result["response_time"]:.2f};{result["status"]};{result["url"]}\n')
 
     if sleeptime is not None:
         time.sleep(sleeptime)
@@ -105,15 +116,18 @@ def crawl(url, domain=None, sleeptime=None, root_url=None):
                     print(f"Gerou exceção: {exc}")
                 finally:
                     crawled.add(futures[future])
+def verify():
+    colluns = ["Response time", "Status code", "URL"]
+    df = pd.read_csv('results.txt', sep=";", names=colluns)
 
+    df_sort = df.sort_values(by="Response time", ascending=False)
+    top_10 = df_sort.head(10)
+
+    top_10.to_csv("results2.txt", index=False, header=False, sep=";")            
 if __name__ == "__main__":
     url = input("Digite a URL: ")
     domain = input("Digite o dominio: ")
-    parser = argparse.ArgumentParser(description="Web Crawler com threading.")
-    parser.add_argument("-u", "--url", help="URL inicial para iniciar o crawling. ")
-    parser.add_argument("-d", "--domain", help="Domínio para restringir o crawling.", default=None)
-    parser.add_argument("-s", "--sleeptime", help="Tempo de espera entre requisições.", type=float, default=None)
-
-    args = parser.parse_args()
-
-    crawl(url, domain, args.sleeptime, root_url=url)
+    reset_file("results.txt")
+    reset_file("results2.txt")
+    crawl(url, domain, None, root_url=url)
+    verify()

