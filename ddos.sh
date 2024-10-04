@@ -54,25 +54,9 @@ proxy_config(){
     sleep 1
     echo -e "\n\n$GREEN [+] Starting proxy containers...$END\n\n\n"
     
-    for i in $(seq 1 5)
+    for i in $(seq 1 8)
     do
         docker run -d --name privoxy_$i -p $((8118+$i)):8118 -p $((9050+$i)):9050 privoxy
-        
-        # Tempo de espera para garantir que o container foi inicializado
-        sleep 2
-
-        echo -e "\n$GREEN[+] Testing proxy privoxy_$i on port $((8118+$i))...$END"
-
-        # Testar se o proxy está funcionando corretamente usando curl
-        response=$(curl -s -x 127.0.0.1:$((8118+$i)) http://ifconfig.es)
-
-        # Verifica se a resposta contém um endereço IP
-        if [[ $response =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo -e "$GREEN[+] Proxy privoxy_$i (127.0.0.1:$((8118+$i))) is working. Public IP: $response$END"
-        else
-            echo -e "$RED[-] Proxy privoxy_$i (127.0.0.1:$((8118+$i))) failed. Check the container.$END"
-        fi
-
         sleep 1
     done
 }

